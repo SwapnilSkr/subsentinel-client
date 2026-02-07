@@ -1,4 +1,4 @@
-name: client
+name: subsentinel
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.6.0
   url_launcher: ^6.3.2
-  uni_links: ^0.5.1
+  app_links: ^6.3.2
 
   # SubSentinel UI Dependencies
   google_fonts: ^6.2.1
