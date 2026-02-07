@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:client/main.dart';
+import 'package:subsentinel/main.dart';
 
 void main() {
   testWidgets('SubSentinel app smoke test', (WidgetTester tester) async {
