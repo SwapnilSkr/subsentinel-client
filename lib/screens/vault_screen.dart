@@ -109,7 +109,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                   onRefresh: () =>
                       ref.read(subscriptionsProvider.notifier).refresh(),
                   color: AppColors.active,
-                  backgroundColor: AppColors.primaryCard,
+                  backgroundColor: AppColors.surfaceFor(context),
                   child: subscriptionsAsync.when(
                     loading: () => _buildLoadingState(),
                     error: (error, stack) => _buildErrorWidget(error),
@@ -258,9 +258,9 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.inbox_outlined,
-              color: AppColors.textMuted,
+              color: AppColors.textMutedFor(context),
               size: 64,
             ),
             const SizedBox(height: 16),
@@ -332,7 +332,9 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                                     width: 48,
                                     height: 48,
                                     decoration: BoxDecoration(
-                                      color: AppColors.glassBackground,
+                                      color: AppColors.glassBackgroundFor(
+                                        context,
+                                      ),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Center(
@@ -416,7 +418,9 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                                           ? AppColors.alert.withValues(
                                               alpha: 0.2,
                                             )
-                                          : AppColors.glassBackground,
+                                          : AppColors.glassBackgroundFor(
+                                              context,
+                                            ),
                                       borderRadius: BorderRadius.circular(20),
                                       border: sub.isRenewingSoon
                                           ? Border.all(
@@ -434,7 +438,9 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                                           ?.copyWith(
                                             color: sub.isRenewingSoon
                                                 ? AppColors.alert
-                                                : AppColors.textSecondary,
+                                                : AppColors.textSecondaryFor(
+                                                    context,
+                                                  ),
                                           ),
                                     ),
                                   ),
@@ -443,7 +449,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                                     isExpanded
                                         ? Icons.keyboard_arrow_up
                                         : Icons.keyboard_arrow_down,
-                                    color: AppColors.textMuted,
+                                    color: AppColors.textMutedFor(context),
                                   ),
                                 ],
                               ),
@@ -480,7 +486,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(color: AppColors.glassBorder),
+          Divider(color: AppColors.glassBorderFor(context)),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -605,7 +611,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                   ? '${sub.provider} resumed'
                   : '${sub.provider} paused',
             ),
-            backgroundColor: AppColors.primaryCard,
+            backgroundColor: AppColors.surfaceFor(context),
           ),
         );
       }
@@ -715,12 +721,12 @@ class _CancelConfirmationSheet extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: AppColors.primaryCard.withValues(alpha: 0.95),
+            color: AppColors.surfaceFor(context).withValues(alpha: 0.95),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: const Border(
-              top: BorderSide(color: AppColors.glassBorder),
-              left: BorderSide(color: AppColors.glassBorder),
-              right: BorderSide(color: AppColors.glassBorder),
+            border: Border(
+              top: BorderSide(color: AppColors.glassBorderFor(context)),
+              left: BorderSide(color: AppColors.glassBorderFor(context)),
+              right: BorderSide(color: AppColors.glassBorderFor(context)),
             ),
           ),
           child: Column(
@@ -730,7 +736,7 @@ class _CancelConfirmationSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.textMuted,
+                  color: AppColors.textMutedFor(context),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -760,7 +766,9 @@ class _CancelConfirmationSheet extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context, false),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.glassBorder),
+                        side: BorderSide(
+                          color: AppColors.glassBorderFor(context),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

@@ -22,14 +22,13 @@ class SkeletonGlow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shimmerColor = accentColor ?? AppColors.active;
+    final base = AppColors.shimmerBaseFor(context);
+    final surface = AppColors.surfaceFor(context);
+    final border = AppColors.glassBorderFor(context);
 
     return Shimmer(
       gradient: LinearGradient(
-        colors: [
-          AppColors.shimmerBase,
-          shimmerColor.withValues(alpha: 0.3),
-          AppColors.shimmerBase,
-        ],
+        colors: [base, shimmerColor.withValues(alpha: 0.3), base],
         stops: const [0.0, 0.5, 1.0],
         begin: const Alignment(-1.5, -0.5),
         end: const Alignment(1.5, 0.5),
@@ -38,9 +37,9 @@ class SkeletonGlow extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: AppColors.primaryCard,
+          color: surface,
           borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(color: AppColors.glassBorder, width: 1),
+          border: Border.all(color: border, width: 1),
         ),
       ),
     );
@@ -53,17 +52,22 @@ class SkeletonSubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = AppColors.surfaceFor(context);
+    final border = AppColors.glassBorderFor(context);
+    final base = AppColors.shimmerBaseFor(context);
+    final highlight = AppColors.shimmerHighlightFor(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryCard,
+        color: surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.glassBorder),
+        border: Border.all(color: border),
       ),
       child: Shimmer.fromColors(
-        baseColor: AppColors.shimmerBase,
-        highlightColor: AppColors.active.withValues(alpha: 0.3),
+        baseColor: base,
+        highlightColor: highlight,
         child: Row(
           children: [
             Container(
@@ -120,9 +124,12 @@ class SkeletonHeroWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final base = AppColors.shimmerBaseFor(context);
+    final highlight = AppColors.shimmerHighlightFor(context);
+
     return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBase,
-      highlightColor: AppColors.active.withValues(alpha: 0.3),
+      baseColor: base,
+      highlightColor: highlight,
       child: Column(
         children: [
           Container(

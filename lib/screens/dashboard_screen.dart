@@ -61,7 +61,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       child: RefreshIndicator(
         onRefresh: () => ref.read(dashboardSummaryProvider.notifier).refresh(),
         color: AppColors.active,
-        backgroundColor: AppColors.primaryCard,
+        backgroundColor: AppColors.surfaceFor(context),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
@@ -359,7 +359,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       percent: progress.clamp(0, 1),
       startAngle: 180,
       arcType: ArcType.HALF,
-      arcBackgroundColor: AppColors.glassBackground,
+      arcBackgroundColor: AppColors.glassBackgroundFor(context),
       progressColor: progressColor,
       backgroundColor: Colors.transparent,
       circularStrokeCap: CircularStrokeCap.round,
@@ -416,11 +416,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       height: 56,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primaryCard,
+                        color: AppColors.surfaceFor(context),
                         border: Border.all(
                           color: isUrgent
                               ? AppColors.alert
-                              : AppColors.glassBorder,
+                              : AppColors.glassBorderFor(context),
                           width: isUrgent ? 2 : 1,
                         ),
                         boxShadow: isUrgent
@@ -439,7 +439,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           style: TextStyle(
                             color: isUrgent
                                 ? AppColors.alert
-                                : AppColors.textSecondary,
+                                : AppColors.textSecondaryFor(context),
                             fontWeight: FontWeight.w700,
                             fontSize: 20,
                           ),
@@ -464,7 +464,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: isUrgent ? AppColors.alert : AppColors.textMuted,
+                    color: isUrgent
+                        ? AppColors.alert
+                        : AppColors.textMutedFor(context),
                   ),
                 ),
               ],

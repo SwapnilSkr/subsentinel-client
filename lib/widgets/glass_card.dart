@@ -32,6 +32,8 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glowColor = accentColor ?? AppColors.active;
+    final surfaceColor = AppColors.surfaceFor(context);
+    final borderColor = AppColors.glassBorderFor(context);
 
     return Container(
       margin: margin,
@@ -59,9 +61,9 @@ class GlassCard extends StatelessWidget {
               child: Container(
                 padding: padding ?? const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryCard.withValues(alpha: 0.8),
+                  color: surfaceColor.withValues(alpha: 0.84),
                   borderRadius: BorderRadius.circular(borderRadius),
-                  border: Border.all(color: AppColors.glassBorder, width: 1),
+                  border: Border.all(color: borderColor, width: 1),
                 ),
                 child: child,
               ),
@@ -137,7 +139,7 @@ class _SwipeableSubscriptionCardState extends State<SwipeableSubscriptionCard> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColors.glassBackground,
+                color: AppColors.glassBackgroundFor(context),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
@@ -173,7 +175,7 @@ class _SwipeableSubscriptionCardState extends State<SwipeableSubscriptionCard> {
               decoration: BoxDecoration(
                 color: widget.isRenewingSoon
                     ? AppColors.alert.withValues(alpha: 0.2)
-                    : AppColors.glassBackground,
+                    : AppColors.glassBackgroundFor(context),
                 borderRadius: BorderRadius.circular(20),
                 border: widget.isRenewingSoon
                     ? Border.all(color: AppColors.alert.withValues(alpha: 0.5))
@@ -184,7 +186,7 @@ class _SwipeableSubscriptionCardState extends State<SwipeableSubscriptionCard> {
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: widget.isRenewingSoon
                       ? AppColors.alert
-                      : AppColors.textSecondary,
+                      : AppColors.textSecondaryFor(context),
                 ),
               ),
             ),

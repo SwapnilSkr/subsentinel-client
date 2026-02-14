@@ -102,7 +102,10 @@ class _LensScreenState extends State<LensScreen>
                     _buildCameraView(),
                     CustomPaint(
                       size: Size.infinite,
-                      painter: _ViewfinderPainter(isScanning: _isScanning),
+                      painter: _ViewfinderPainter(
+                        isScanning: _isScanning,
+                        inactiveColor: AppColors.textMutedFor(context),
+                      ),
                     ),
                     if (_isScanning) _buildScanningLine(),
                     ..._buildDetectedChips(),
@@ -160,15 +163,15 @@ class _LensScreenState extends State<LensScreen>
   Widget _buildCameraView() {
     if (!_hasCameraPermission) {
       return Container(
-        color: AppColors.primaryCard,
+        color: AppColors.surfaceFor(context),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.camera_alt_outlined,
                 size: 64,
-                color: AppColors.textMuted,
+                color: AppColors.textMutedFor(context),
               ),
               const SizedBox(height: 16),
               Text(
@@ -190,7 +193,7 @@ class _LensScreenState extends State<LensScreen>
     }
     if (!_isCameraInitialized) {
       return Container(
-        color: AppColors.primaryCard,
+        color: AppColors.surfaceFor(context),
         child: const Center(
           child: CircularProgressIndicator(color: AppColors.active),
         ),
@@ -281,9 +284,9 @@ class _LensScreenState extends State<LensScreen>
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primaryCard.withValues(alpha: 0.8),
+              color: AppColors.surfaceFor(context).withValues(alpha: 0.82),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.glassBorder),
+              border: Border.all(color: AppColors.glassBorderFor(context)),
             ),
             child: Row(
               children: [
@@ -403,12 +406,14 @@ class _LensScreenState extends State<LensScreen>
 
 class _ViewfinderPainter extends CustomPainter {
   final bool isScanning;
-  _ViewfinderPainter({required this.isScanning});
+  final Color inactiveColor;
+
+  _ViewfinderPainter({required this.isScanning, required this.inactiveColor});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = isScanning ? AppColors.scanLine : AppColors.textMuted
+      ..color = isScanning ? AppColors.scanLine : inactiveColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
@@ -475,5 +480,6 @@ class _ViewfinderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ViewfinderPainter oldDelegate) =>
-      oldDelegate.isScanning != isScanning;
+      oldDelegate.isScanning != isScanning ||
+      oldDelegate.inactiveColor != inactiveColor;
 }

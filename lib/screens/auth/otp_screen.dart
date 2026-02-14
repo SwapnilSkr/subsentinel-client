@@ -25,13 +25,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       height: 56,
       textStyle: GoogleFonts.interTight(
         fontSize: 22,
-        color: AppColors.textPrimary,
+        color: AppColors.textPrimaryFor(context),
         fontWeight: FontWeight.w600,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primaryCard,
+        color: AppColors.surfaceFor(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.glassBorder),
+        border: Border.all(color: AppColors.glassBorderFor(context)),
       ),
     );
 
@@ -46,11 +46,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: AppColors.canvasFor(context),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: AppColors.textPrimary),
+        leading: BackButton(color: AppColors.textPrimaryFor(context)),
       ),
       body: SafeArea(
         child: Padding(
@@ -64,7 +64,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 style: GoogleFonts.interTight(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryFor(context),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -73,7 +73,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 "Enter code sent to ${widget.phone}",
                 style: GoogleFonts.interTight(
                   fontSize: 16,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondaryFor(context),
                 ),
                 textAlign: TextAlign.center,
               ),

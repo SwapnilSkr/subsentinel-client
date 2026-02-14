@@ -38,6 +38,38 @@ class AppTheme {
     );
   }
 
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.lightCanvas,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.lightActive,
+        secondary: AppColors.lightPaused,
+        error: AppColors.lightAlert,
+        surface: AppColors.lightPrimaryCard,
+        onPrimary: AppColors.lightPrimaryCard,
+        onSecondary: AppColors.lightPrimaryCard,
+        onError: AppColors.lightTextPrimary,
+        onSurface: AppColors.lightTextPrimary,
+      ),
+      textTheme: _buildLightTextTheme(),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.lightPrimaryCard,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.lightGlassBorder, width: 1),
+        ),
+      ),
+    );
+  }
+
   static TextTheme _buildTextTheme() {
     return GoogleFonts.interTightTextTheme(
       const TextTheme(
@@ -92,6 +124,65 @@ class AppTheme {
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: AppColors.textMuted,
+        ),
+      ),
+    );
+  }
+
+  static TextTheme _buildLightTextTheme() {
+    return GoogleFonts.interTightTextTheme(
+      const TextTheme(
+        displayLarge: TextStyle(
+          fontSize: 72,
+          fontWeight: FontWeight.w800,
+          color: AppColors.lightTextPrimary,
+          letterSpacing: -2,
+        ),
+        displayMedium: TextStyle(
+          fontSize: 48,
+          fontWeight: FontWeight.w600,
+          color: AppColors.lightTextPrimary,
+          letterSpacing: -1,
+        ),
+        headlineLarge: TextStyle(
+          fontSize: 32,
+          fontWeight: FontWeight.w600,
+          color: AppColors.lightTextPrimary,
+        ),
+        headlineMedium: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w500,
+          color: AppColors.lightTextPrimary,
+        ),
+        titleLarge: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w500,
+          color: AppColors.lightTextPrimary,
+        ),
+        titleMedium: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: AppColors.lightTextPrimary,
+        ),
+        bodyLarge: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: AppColors.lightTextSecondary,
+        ),
+        bodyMedium: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: AppColors.lightTextSecondary,
+        ),
+        labelLarge: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: AppColors.lightTextPrimary,
+        ),
+        labelMedium: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: AppColors.lightTextMuted,
         ),
       ),
     );

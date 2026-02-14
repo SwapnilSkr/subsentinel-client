@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_colors.dart';
+import 'core/theme/theme_mode_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/vault_screen.dart';
 import 'screens/lens_screen.dart';
 import 'screens/strategy_screen.dart';
+import 'screens/account_screen.dart';
 import 'widgets/floating_tab_bar.dart';
 
 import 'screens/auth/login_screen.dart';
@@ -57,10 +59,30 @@ class SubSentinelApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: isDark
+            ? AppColors.canvas
+            : AppColors.lightCanvas,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
+    );
+
     return MaterialApp(
       title: 'SubSentinel',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
+      themeAnimationDuration: const Duration(milliseconds: 420),
+      themeAnimationCurve: Curves.easeInOutCubicEmphasized,
       home: const AuthWrapper(),
     );
   }
@@ -74,9 +96,11 @@ class AuthWrapper extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     if (authState.isLoading) {
-      return const Scaffold(
-        backgroundColor: AppColors.canvas,
-        body: Center(child: CircularProgressIndicator(color: AppColors.active)),
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.active),
+        ),
       );
     }
 
@@ -104,12 +128,13 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     VaultScreen(),
     LensScreen(),
     StrategyScreen(),
+    AccountScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Current screen

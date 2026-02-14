@@ -110,7 +110,11 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
               ],
             ),
           ),
-          Container(width: 1, height: 40, color: AppColors.glassBorder),
+          Container(
+            width: 1,
+            height: 40,
+            color: AppColors.glassBorderFor(context),
+          ),
           Expanded(
             child: Column(
               children: [
@@ -120,7 +124,11 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
               ],
             ),
           ),
-          Container(width: 1, height: 40, color: AppColors.glassBorder),
+          Container(
+            width: 1,
+            height: 40,
+            color: AppColors.glassBorderFor(context),
+          ),
           Expanded(
             child: Column(
               children: [
@@ -154,7 +162,7 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
                       Container(
                         width: 2,
                         height: 60,
-                        color: AppColors.glassBorder,
+                        color: AppColors.glassBorderFor(context),
                       ),
                   ],
                 ),
@@ -233,7 +241,11 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
               color: AppColors.active,
             ),
           ),
-          Container(width: 1, height: 40, color: AppColors.glassBorder),
+          Container(
+            width: 1,
+            height: 40,
+            color: AppColors.glassBorderFor(context),
+          ),
           Expanded(
             child: _StatItem(
               title: 'Next Month',
@@ -241,7 +253,11 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
               color: AppColors.paused,
             ),
           ),
-          Container(width: 1, height: 40, color: AppColors.glassBorder),
+          Container(
+            width: 1,
+            height: 40,
+            color: AppColors.glassBorderFor(context),
+          ),
           Expanded(
             child: _StatItem(
               title: 'Potential Save',
@@ -260,9 +276,9 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.calendar_today,
-              color: AppColors.textMuted,
+              color: AppColors.textMutedFor(context),
               size: 64,
             ),
             const SizedBox(height: 16),
@@ -306,7 +322,7 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isPast
-                          ? AppColors.textMuted
+                          ? AppColors.textMutedFor(context)
                           : (isToday ? AppColors.alert : AppColors.active),
                       boxShadow: !isPast
                           ? [
@@ -326,7 +342,7 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
                     Container(
                       width: 2,
                       height: 60,
-                      color: AppColors.glassBorder,
+                      color: AppColors.glassBorderFor(context),
                     ),
                 ],
               ),
@@ -350,7 +366,9 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: AppColors.glassBackground,
+                                    color: AppColors.glassBackgroundFor(
+                                      context,
+                                    ),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Center(
@@ -360,7 +378,7 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
                                           : '?',
                                       style: TextStyle(
                                         color: isPast
-                                            ? AppColors.textMuted
+                                            ? AppColors.textMutedFor(context)
                                             : AppColors.active,
                                         fontWeight: FontWeight.w700,
                                         fontSize: 18,
@@ -427,7 +445,7 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
                                   '\$${sub.amount.toStringAsFixed(2)}',
                                   style: TextStyle(
                                     color: isPast
-                                        ? AppColors.textMuted
+                                        ? AppColors.textMutedFor(context)
                                         : AppColors.active,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 16,
@@ -464,8 +482,8 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primaryCard.withValues(alpha: 0.95),
-                    AppColors.primaryCard.withValues(alpha: 0.85),
+                    AppColors.surfaceFor(context).withValues(alpha: 0.95),
+                    AppColors.surfaceFor(context).withValues(alpha: 0.85),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -508,9 +526,9 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
                       const Spacer(),
                       GestureDetector(
                         onTap: () => setState(() => _showInsight = false),
-                        child: const Icon(
+                        child: Icon(
                           Icons.close,
-                          color: AppColors.textMuted,
+                          color: AppColors.textMutedFor(context),
                           size: 20,
                         ),
                       ),
@@ -556,8 +574,8 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
                         child: OutlinedButton(
                           onPressed: () => setState(() => _showInsight = false),
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: AppColors.glassBorder,
+                            side: BorderSide(
+                              color: AppColors.glassBorderFor(context),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(

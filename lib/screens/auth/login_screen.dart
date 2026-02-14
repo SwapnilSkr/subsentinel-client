@@ -22,7 +22,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // Actually better to handle navigation in button press with await
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: AppColors.canvasFor(context),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -37,7 +37,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 style: GoogleFonts.interTight(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryFor(context),
                   letterSpacing: -1.0,
                 ),
               ),
@@ -47,7 +47,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.interTight(
                   fontSize: 16,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondaryFor(context),
                 ),
               ),
               const SizedBox(height: 48),
@@ -55,9 +55,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // Phone Input Card
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.primaryCard,
+                  color: AppColors.surfaceFor(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.glassBorder),
+                  border: Border.all(color: AppColors.glassBorderFor(context)),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.active.withValues(alpha: 0.05),
@@ -72,14 +72,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: TextField(
                   controller: _phoneController,
                   style: GoogleFonts.interTight(
-                    color: AppColors.textPrimary,
+                    color: AppColors.textPrimaryFor(context),
                     fontSize: 18,
                   ),
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: "+1 555 000 0000",
-                    hintStyle: TextStyle(color: AppColors.textMuted),
+                    hintStyle: TextStyle(
+                      color: AppColors.textMutedFor(context),
+                    ),
                     icon: Icon(Icons.phone_iphone, color: AppColors.active),
                   ),
                 ),
@@ -121,15 +123,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // Divider
               Row(
                 children: [
-                  Expanded(child: Divider(color: AppColors.glassBorder)),
+                  Expanded(
+                    child: Divider(color: AppColors.glassBorderFor(context)),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       "OR",
-                      style: TextStyle(color: AppColors.textMuted),
+                      style: TextStyle(color: AppColors.textMutedFor(context)),
                     ),
                   ),
-                  Expanded(child: Divider(color: AppColors.glassBorder)),
+                  Expanded(
+                    child: Divider(color: AppColors.glassBorderFor(context)),
+                  ),
                 ],
               ),
               const SizedBox(height: 32),
@@ -139,20 +145,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onPressed: _handleGoogleSignIn,
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: BorderSide(color: AppColors.glassBorder),
+                  side: BorderSide(color: AppColors.glassBorderFor(context)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                icon: const Icon(
+                icon: Icon(
                   Icons.g_mobiledata,
                   size: 28,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryFor(context),
                 ),
                 label: Text(
                   "Continue with Google",
                   style: GoogleFonts.interTight(
-                    color: AppColors.textPrimary,
+                    color: AppColors.textPrimaryFor(context),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
