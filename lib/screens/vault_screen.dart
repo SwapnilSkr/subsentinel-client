@@ -10,6 +10,7 @@ import '../core/theme/app_theme.dart';
 import '../data/models/category.dart';
 import '../data/providers/subscription_providers.dart';
 import '../data/models/subscription.dart';
+import '../widgets/vault_bottom_sheets.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/service_avatar.dart';
 import '../widgets/skeleton_glow.dart';
@@ -54,18 +55,39 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               // Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Text(
-                      'The Vault',
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.1),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Manage your subscriptions',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                                'The Vault',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.headlineLarge,
+                              )
+                              .animate()
+                              .fadeIn(duration: 400.ms)
+                              .slideX(begin: -0.1),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Manage your subscriptions',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
+                        ],
+                      ),
+                    ),
+                    IconButton.filledTonal(
+                      onPressed: _openCreateSubscriptionSheet,
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.active.withValues(
+                          alpha: 0.2,
+                        ),
+                        foregroundColor: AppColors.active,
+                      ),
+                      icon: const Icon(Icons.add_rounded),
+                    ),
                   ],
                 ),
               ),
@@ -139,6 +161,16 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
             createParticlePath: _drawEmojiPath,
           ),
         ),
+        Positioned(
+          right: 16,
+          bottom: 112,
+          child: FloatingActionButton(
+            onPressed: _openCreateSubscriptionSheet,
+            backgroundColor: AppColors.active,
+            foregroundColor: Colors.black,
+            child: const Icon(Icons.add),
+          ),
+        ),
       ],
     );
   }
@@ -161,6 +193,19 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
         ],
       ),
     ).animate().fadeIn(delay: 200.ms, duration: 400.ms);
+  }
+
+  Future<void> _openCreateSubscriptionSheet() async {
+    final created = await showCreateSubscriptionBottomSheet(context);
+
+    if (created == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Subscription added'),
+          backgroundColor: AppColors.surfaceFor(context),
+        ),
+      );
+    }
   }
 
   Widget _buildTotalCard(List<Subscription> subscriptions) {
@@ -274,6 +319,20 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
             Text(
               'Add your first subscription to get started',
               style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _openCreateSubscriptionSheet,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.active,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Subscription'),
             ),
           ],
         ),
@@ -726,7 +785,13 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
             .read(subscriptionsProvider.notifier)
             .cancelSubscription(sub.id);
       } catch (e) {
-        // ignore error - subscription was already removed from UI
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to cancel subscription: $e'),
+            backgroundColor: AppColors.alert,
+          ),
+        );
       }
     }
   }
