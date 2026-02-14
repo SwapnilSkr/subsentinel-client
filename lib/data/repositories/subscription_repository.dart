@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/subscription.dart';
+import 'auth_session_storage.dart';
 
 /// Repository for API calls to the ElysiaJS backend
 class SubscriptionRepository {
@@ -14,16 +15,29 @@ class SubscriptionRepository {
   }
 
   final http.Client _client;
+  final AuthSessionStorage _sessionStorage;
 
-  SubscriptionRepository({http.Client? client})
-    : _client = client ?? http.Client();
+  SubscriptionRepository({
+    http.Client? client,
+    AuthSessionStorage? sessionStorage,
+  }) : _client = client ?? http.Client(),
+       _sessionStorage = sessionStorage ?? AuthSessionStorage();
+
+  Future<Map<String, String>> _authHeaders() async {
+    final headers = <String, String>{'Content-Type': 'application/json'};
+    final token = await _sessionStorage.readAuthToken();
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
+  }
 
   /// Fetch all subscriptions
   Future<List<Subscription>> fetchSubscriptions() async {
     try {
       final response = await _client.get(
         Uri.parse('$baseUrl/subscriptions'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -43,7 +57,7 @@ class SubscriptionRepository {
     try {
       final response = await _client.get(
         Uri.parse('$baseUrl/subscriptions/summary'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -59,10 +73,12 @@ class SubscriptionRepository {
   /// Create a new subscription
   Future<Subscription> createSubscription(Subscription subscription) async {
     try {
+      final payload = Map<String, dynamic>.from(subscription.toJson())
+        ..remove('userId');
       final response = await _client.post(
         Uri.parse('$baseUrl/subscriptions'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(subscription.toJson()),
+        headers: await _authHeaders(),
+        body: jsonEncode(payload),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -81,7 +97,7 @@ class SubscriptionRepository {
     try {
       final response = await _client.patch(
         Uri.parse('$baseUrl/subscriptions/$id/status'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
         body: jsonEncode({'status': status}),
       );
 
@@ -100,7 +116,7 @@ class SubscriptionRepository {
     try {
       final response = await _client.delete(
         Uri.parse('$baseUrl/subscriptions/$id'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
       );
 
       return response.statusCode == 200;
@@ -110,20 +126,12 @@ class SubscriptionRepository {
   }
 
   /// Register device for push notifications
-  Future<bool> registerDevice(
-    String token,
-    String platform, {
-    String? userId,
-  }) async {
+  Future<bool> registerDevice(String token, String platform) async {
     try {
       final response = await _client.post(
         Uri.parse('$baseUrl/register-device'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'token': token,
-          'platform': platform,
-          if (userId != null) 'userId': userId,
-        }),
+        headers: await _authHeaders(),
+        body: jsonEncode({'token': token, 'platform': platform}),
       );
 
       return response.statusCode == 200;
@@ -141,7 +149,7 @@ class SubscriptionRepository {
     try {
       final response = await _client.post(
         Uri.parse('$baseUrl/checkout'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
         body: jsonEncode({
           'productId': productId,
           'email': email,

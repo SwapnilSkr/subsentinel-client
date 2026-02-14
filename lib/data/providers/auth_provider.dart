@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/models/user_model.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/auth_session_storage.dart';
 
 // --- State ---
 class AuthState {
@@ -36,6 +36,7 @@ final authProvider = NotifierProvider<AuthNotifier, AuthState>(
 
 class AuthNotifier extends Notifier<AuthState> {
   final AuthRepository _repo = AuthRepository();
+  final AuthSessionStorage _sessionStorage = AuthSessionStorage();
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
@@ -62,29 +63,18 @@ class AuthNotifier extends Notifier<AuthState> {
           // If no Firebase user, check if we have a locally saved "Twilio" session
           await _checkLocalSession();
         } else {
-          // If Firebase user exists, trust it, but try to sync with backend model
-          final prefs = await SharedPreferences.getInstance();
-          final userData = prefs.getString('user_data');
+          // If Firebase user exists, ensure backend session exists too
+          final userData = await _sessionStorage.readUserData();
+          final authToken = await _sessionStorage.readAuthToken();
 
-          if (userData != null) {
+          if (userData != null && authToken != null && authToken.isNotEmpty) {
             // We have local data, use it for speed
             state = AuthState(
               user: AppUser.fromJson(jsonDecode(userData)),
               isLoading: false,
             );
           } else {
-            // Fallback: If we have firebase user but no local data, create a temporary AppUser
-            // In a real app, we should fetch the profile from API using the backend token
-            state = AuthState(
-              user: AppUser(
-                id: firebaseUser.uid,
-                email: firebaseUser.email,
-                displayName: firebaseUser.displayName,
-                photoUrl: firebaseUser.photoURL,
-                phone: firebaseUser.phoneNumber,
-              ),
-              isLoading: false,
-            );
+            await _restoreGoogleBackendSession(firebaseUser);
           }
         }
       } catch (e) {
@@ -95,21 +85,36 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> _checkLocalSession() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final userData = prefs.getString('user_data');
-      if (userData != null) {
+      final userData = await _sessionStorage.readUserData();
+      final authToken = await _sessionStorage.readAuthToken();
+      if (userData != null && authToken != null && authToken.isNotEmpty) {
         // We found a session (likely Twilio/Phone or stale Google)
         state = AuthState(
           user: AppUser.fromJson(jsonDecode(userData)),
           isLoading: false,
         );
       } else {
+        await _sessionStorage.clearSession();
         // Really logged out
         state = AuthState(user: null, isLoading: false);
       }
     } catch (e) {
       state = AuthState(user: null, error: e.toString(), isLoading: false);
     }
+  }
+
+  Future<void> _restoreGoogleBackendSession(User firebaseUser) async {
+    final idToken = await firebaseUser.getIdToken();
+    if (idToken == null || idToken.isEmpty) {
+      throw Exception('Missing Firebase ID token');
+    }
+    final result = await _repo.googleLogin(idToken);
+    final user = result['user'] as AppUser;
+    await _sessionStorage.saveSession(
+      user: user,
+      token: result['token'] as String,
+    );
+    state = AuthState(user: user, isLoading: false);
   }
 
   // Send OTP (Twilio Logic)
@@ -132,10 +137,10 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       final result = await _repo.verifyOtp(phone, code);
       final user = result['user'] as AppUser;
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_data', jsonEncode(user.toJson()));
-      await prefs.setString('auth_token', result['token']);
+      await _sessionStorage.saveSession(
+        user: user,
+        token: result['token'] as String,
+      );
 
       // We manually update state because this flow is outside Firebase
       state = AuthState(user: user, isLoading: false);
@@ -173,16 +178,20 @@ class AuthNotifier extends Notifier<AuthState> {
       if (firebaseUser != null) {
         // 5. Get ID Token to send to Backend
         final idToken = await firebaseUser.getIdToken();
+        if (idToken == null || idToken.isEmpty) {
+          throw Exception('Missing Firebase ID token');
+        }
 
         // 6. Verify with Backend (and create/update user in DB)
         // We proactively do this to ensure backend has the user and we get the backend session token
-        final result = await _repo.googleLogin(idToken!);
+        final result = await _repo.googleLogin(idToken);
         final user = result['user'] as AppUser;
 
         // 7. Save Session
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user_data', jsonEncode(user.toJson()));
-        await prefs.setString('auth_token', result['token']);
+        await _sessionStorage.saveSession(
+          user: user,
+          token: result['token'] as String,
+        );
 
         // Listener will eventually update state, but we can fast-track updates here
         state = AuthState(user: user, isLoading: false);
@@ -195,8 +204,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
   // Logout
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await _sessionStorage.clearSession();
     await _googleSignIn.signOut();
     await _firebaseAuth.signOut();
     state = AuthState(user: null);
