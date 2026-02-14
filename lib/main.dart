@@ -76,9 +76,7 @@ class AuthWrapper extends ConsumerWidget {
     if (authState.isLoading) {
       return const Scaffold(
         backgroundColor: AppColors.canvas,
-        body: Center(
-          child: CircularProgressIndicator(color: Color(0xFF00FF41)),
-        ),
+        body: Center(child: CircularProgressIndicator(color: AppColors.active)),
       );
     }
 

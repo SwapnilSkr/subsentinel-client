@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'otp_screen.dart';
 import '../../data/providers/auth_provider.dart';
+import '../../core/theme/app_colors.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -21,7 +22,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // Actually better to handle navigation in button press with await
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.canvas,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -36,7 +37,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 style: GoogleFonts.interTight(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   letterSpacing: -1.0,
                 ),
               ),
@@ -46,7 +47,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.interTight(
                   fontSize: 16,
-                  color: Colors.white54,
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 48),
@@ -54,14 +55,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // Phone Input Card
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF121212),
+                  color: AppColors.primaryCard,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
-                  ),
+                  border: Border.all(color: AppColors.glassBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00FF41).withValues(alpha: 0.05),
+                      color: AppColors.active.withValues(alpha: 0.05),
                       blurRadius: 20,
                     ),
                   ],
@@ -73,15 +72,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: TextField(
                   controller: _phoneController,
                   style: GoogleFonts.interTight(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 18,
                   ),
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: "+1 555 000 0000",
-                    hintStyle: TextStyle(color: Colors.white38),
-                    icon: Icon(Icons.phone_iphone, color: Color(0xFF00FF41)),
+                    hintStyle: TextStyle(color: AppColors.textMuted),
+                    icon: Icon(Icons.phone_iphone, color: AppColors.active),
                   ),
                 ),
               ),
@@ -91,7 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleSendOtp,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00FF41),
+                  backgroundColor: AppColors.active,
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -122,12 +121,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // Divider
               Row(
                 children: [
-                  Expanded(child: Divider(color: Colors.white24)),
+                  Expanded(child: Divider(color: AppColors.glassBorder)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text("OR", style: TextStyle(color: Colors.white24)),
+                    child: Text(
+                      "OR",
+                      style: TextStyle(color: AppColors.textMuted),
+                    ),
                   ),
-                  Expanded(child: Divider(color: Colors.white24)),
+                  Expanded(child: Divider(color: AppColors.glassBorder)),
                 ],
               ),
               const SizedBox(height: 32),
@@ -137,7 +139,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onPressed: _handleGoogleSignIn,
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: BorderSide(color: Colors.white24),
+                  side: BorderSide(color: AppColors.glassBorder),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -145,12 +147,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 icon: const Icon(
                   Icons.g_mobiledata,
                   size: 28,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                 ),
                 label: Text(
                   "Continue with Google",
                   style: GoogleFonts.interTight(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

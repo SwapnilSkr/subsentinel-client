@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 import '../../data/providers/auth_provider.dart';
+import '../../core/theme/app_colors.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   final String phone;
@@ -24,32 +25,32 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       height: 56,
       textStyle: GoogleFonts.interTight(
         fontSize: 22,
-        color: Colors.white,
+        color: AppColors.textPrimary,
         fontWeight: FontWeight.w600,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF121212),
+        color: AppColors.primaryCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: AppColors.glassBorder),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyDecorationWith(
-      border: Border.all(color: const Color(0xFF00FF41), width: 2),
+      border: Border.all(color: AppColors.active, width: 2),
       boxShadow: [
         BoxShadow(
-          color: const Color(0xFF00FF41).withValues(alpha: 0.25),
+          color: AppColors.active.withValues(alpha: 0.25),
           blurRadius: 12,
         ),
       ],
     );
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: Colors.white),
+        leading: BackButton(color: AppColors.textPrimary),
       ),
       body: SafeArea(
         child: Padding(
@@ -63,16 +64,16 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 style: GoogleFonts.interTight(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                "Enter the code sent to ${widget.phone}",
+                "Enter code sent to ${widget.phone}",
                 style: GoogleFonts.interTight(
                   fontSize: 16,
-                  color: Colors.white54,
+                  color: AppColors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -95,7 +96,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleVerify,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00FF41),
+                  backgroundColor: AppColors.active,
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
