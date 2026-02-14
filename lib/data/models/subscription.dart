@@ -10,7 +10,8 @@ class Subscription {
   final SubscriptionStatus status;
   final Category? category;
   final String? categoryId;
-  final String? userId;
+  final String? logoUrl;
+  final bool isDefault;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -23,7 +24,8 @@ class Subscription {
     this.status = SubscriptionStatus.active,
     this.category,
     this.categoryId,
-    this.userId,
+    this.logoUrl,
+    this.isDefault = false,
     this.createdAt,
     this.updatedAt,
   });
@@ -55,9 +57,11 @@ class Subscription {
           ? Category.fromJson(json['categoryId'])
           : null,
       categoryId: json['categoryId'] is Map<String, dynamic>
-          ? (json['categoryId']['_id']?.toString() ?? json['categoryId']['id']?.toString())
+          ? (json['categoryId']['_id']?.toString() ??
+                json['categoryId']['id']?.toString())
           : json['categoryId']?.toString(),
-      userId: json['userId'],
+      logoUrl: _stringOrNull(json['logoUrl']),
+      isDefault: json['isDefault'] == true,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : null,
@@ -75,7 +79,7 @@ class Subscription {
       'next_billing': nextBilling.toIso8601String(),
       'status': status.value,
       if (categoryId != null) 'categoryId': categoryId,
-      if (userId != null) 'userId': userId,
+      if (logoUrl != null && logoUrl!.isNotEmpty) 'logoUrl': logoUrl,
     };
   }
 
@@ -88,7 +92,8 @@ class Subscription {
     SubscriptionStatus? status,
     Category? category,
     String? categoryId,
-    String? userId,
+    String? logoUrl,
+    bool? isDefault,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -99,11 +104,19 @@ class Subscription {
       status: status ?? this.status,
       category: category ?? this.category,
       categoryId: categoryId ?? this.categoryId,
-      userId: userId ?? this.userId,
+      logoUrl: logoUrl ?? this.logoUrl,
+      isDefault: isDefault ?? this.isDefault,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
   }
+}
+
+String? _stringOrNull(dynamic value) {
+  if (value is! String) return null;
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return null;
+  return trimmed;
 }
 
 enum SubscriptionStatus {

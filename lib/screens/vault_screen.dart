@@ -7,9 +7,11 @@ import 'package:confetti/confetti.dart';
 import 'package:intl/intl.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_theme.dart';
+import '../data/models/category.dart';
 import '../data/providers/subscription_providers.dart';
 import '../data/models/subscription.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/service_avatar.dart';
 import '../widgets/skeleton_glow.dart';
 
 /// Screen B: "The Vault" (Subscription Management)
@@ -327,31 +329,13 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                               padding: const EdgeInsets.all(16),
                               child: Row(
                                 children: [
-                                  // Logo placeholder
-                                  Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.glassBackgroundFor(
-                                        context,
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        sub.provider.isNotEmpty
-                                            ? sub.provider[0].toUpperCase()
-                                            : '?',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium
-                                            ?.copyWith(
-                                              color: sub.isPaused
-                                                  ? AppColors.paused
-                                                  : AppColors.active,
-                                            ),
-                                      ),
-                                    ),
+                                  ServiceAvatar(
+                                    name: sub.provider,
+                                    logoUrl:
+                                        sub.logoUrl ?? sub.category?.logoUrl,
+                                    textColor: sub.isPaused
+                                        ? AppColors.paused
+                                        : AppColors.active,
                                   ),
                                   const SizedBox(width: 16),
                                   // Name and Price
@@ -395,6 +379,30 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                                                 ),
                                               ),
                                             ],
+                                            if (sub.isDefault) ...[
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 2,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.scanLine
+                                                      .withValues(alpha: 0.2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                                child: const Text(
+                                                  'TEMPLATE',
+                                                  style: TextStyle(
+                                                    color: AppColors.scanLine,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                         const SizedBox(height: 4),
@@ -409,30 +417,36 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                                             if (sub.category != null) ...[
                                               const SizedBox(width: 8),
                                               Container(
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: 6,
-                                                  vertical: 2,
-                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
                                                 decoration: BoxDecoration(
-                                                  color: _parseColor(sub.category!.color)
-                                                      .withValues(alpha: 0.15),
-                                                  borderRadius: BorderRadius.circular(8),
+                                                  color: _parseColor(
+                                                    sub.category!.color,
+                                                  ).withValues(alpha: 0.15),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
                                                 ),
                                                 child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
                                                   children: [
-                                                    Icon(
-                                                      _mapCategoryIcon(sub.category!.icon),
+                                                    _buildCategoryMarker(
+                                                      category: sub.category!,
                                                       size: 10,
-                                                      color: _parseColor(sub.category!.color),
                                                     ),
                                                     const SizedBox(width: 4),
                                                     Text(
                                                       sub.category!.name,
                                                       style: TextStyle(
-                                                        color: _parseColor(sub.category!.color),
+                                                        color: _parseColor(
+                                                          sub.category!.color,
+                                                        ),
                                                         fontSize: 10,
-                                                        fontWeight: FontWeight.w600,
+                                                        fontWeight:
+                                                            FontWeight.w600,
                                                       ),
                                                     ),
                                                   ],
@@ -559,19 +573,20 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               children: [
                 Text('Category', style: Theme.of(context).textTheme.labelLarge),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: _parseColor(sub.category!.color).withValues(alpha: 0.15),
+                    color: _parseColor(
+                      sub.category!.color,
+                    ).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        _mapCategoryIcon(sub.category!.icon),
-                        size: 14,
-                        color: _parseColor(sub.category!.color),
-                      ),
+                      _buildCategoryMarker(category: sub.category!, size: 14),
                       const SizedBox(width: 6),
                       Text(
                         sub.category!.name,
@@ -739,6 +754,34 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
       'build': Icons.build,
     };
     return iconMap[icon] ?? Icons.category;
+  }
+
+  Widget _buildCategoryMarker({
+    required Category category,
+    required double size,
+  }) {
+    if (category.logoUrl != null && category.logoUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(size / 2),
+        child: Image.network(
+          category.logoUrl!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Icon(
+            _mapCategoryIcon(category.icon),
+            size: size,
+            color: _parseColor(category.color),
+          ),
+        ),
+      );
+    }
+
+    return Icon(
+      _mapCategoryIcon(category.icon),
+      size: size,
+      color: _parseColor(category.color),
+    );
   }
 
   Path _drawEmojiPath(Size size) {

@@ -7,6 +7,7 @@ import '../core/theme/app_colors.dart';
 import '../data/providers/subscription_providers.dart';
 import '../data/models/subscription.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/service_avatar.dart';
 import '../widgets/skeleton_glow.dart';
 
 /// Screen D: "Strategy & Churn" (Analysis)
@@ -362,29 +363,14 @@ class _StrategyScreenState extends ConsumerState<StrategyScreen> {
                             padding: const EdgeInsets.all(16),
                             child: Row(
                               children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.glassBackgroundFor(
-                                      context,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      sub.provider.isNotEmpty
-                                          ? sub.provider[0].toUpperCase()
-                                          : '?',
-                                      style: TextStyle(
-                                        color: isPast
-                                            ? AppColors.textMutedFor(context)
-                                            : AppColors.active,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  ),
+                                ServiceAvatar(
+                                  name: sub.provider,
+                                  logoUrl: sub.logoUrl ?? sub.category?.logoUrl,
+                                  size: 40,
+                                  borderRadius: 10,
+                                  textColor: isPast
+                                      ? AppColors.textMutedFor(context)
+                                      : AppColors.active,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(

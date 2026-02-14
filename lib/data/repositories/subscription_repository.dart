@@ -1,19 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../../core/constants.dart';
 import '../models/subscription.dart';
 import '../models/category.dart';
 import 'auth_session_storage.dart';
 
 /// Repository for API calls to the ElysiaJS backend
 class SubscriptionRepository {
-  // Use 10.0.2.2 for Android emulator, localhost for iOS simulator, or your actual IP
-  static String get baseUrl {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3000';
-    }
-    return 'http://localhost:3000';
-  }
+  static String get baseUrl => AppConstants.apiBaseUrl;
 
   final http.Client _client;
   final AuthSessionStorage _sessionStorage;
@@ -74,8 +69,7 @@ class SubscriptionRepository {
   /// Create a new subscription
   Future<Subscription> createSubscription(Subscription subscription) async {
     try {
-      final payload = Map<String, dynamic>.from(subscription.toJson())
-        ..remove('userId');
+      final payload = Map<String, dynamic>.from(subscription.toJson());
       final response = await _client.post(
         Uri.parse('$baseUrl/subscriptions'),
         headers: await _authHeaders(),
