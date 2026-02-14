@@ -113,20 +113,22 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   // Send OTP (Twilio Logic)
+  // Note: isLoading is NOT set here — screens manage their own loading UI.
+  // Setting isLoading on auth state would cause AuthWrapper to swap out the
+  // current screen with a loading spinner, unmounting the widget mid-call.
   Future<void> sendOtp(String phone) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(clearError: true);
     try {
       await _repo.sendOtp(phone);
-      state = state.copyWith(isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(error: e.toString());
       rethrow;
     }
   }
 
   // Verify OTP (Twilio Logic)
   Future<void> verifyOtp(String phone, String code) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(clearError: true);
     try {
       final result = await _repo.verifyOtp(phone, code);
       final user = result['user'] as AppUser;
@@ -136,16 +138,16 @@ class AuthNotifier extends Notifier<AuthState> {
       await prefs.setString('auth_token', result['token']);
 
       // We manually update state because this flow is outside Firebase
-      state = AuthState(user: user);
+      state = AuthState(user: user, isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(error: e.toString());
       rethrow;
     }
   }
 
   // Google Login with Firebase
   Future<void> signInWithGoogle() async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(clearError: true);
     try {
       // 1. Trigger Google Sign In flow
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate(
@@ -183,7 +185,7 @@ class AuthNotifier extends Notifier<AuthState> {
         await prefs.setString('auth_token', result['token']);
 
         // Listener will eventually update state, but we can fast-track updates here
-        state = AuthState(user: user);
+        state = AuthState(user: user, isLoading: false);
       }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

@@ -168,9 +168,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-    // Simulate slight delay for UX
-    await Future.delayed(const Duration(milliseconds: 500));
-
     try {
       // Call provider
       await ref.read(authProvider.notifier).sendOtp(phone);

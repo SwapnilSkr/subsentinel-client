@@ -128,15 +128,16 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _handleVerify() async {
     final code = _otpController.text.trim();
-    if (code.length != 6) return;
+    if (code.length != 6 || _isLoading) return;
 
     setState(() => _isLoading = true);
 
     try {
       await ref.read(authProvider.notifier).verifyOtp(widget.phone, code);
-      // Navigation is handled by auth state listener in main.dart usually
+      // Pop back to AuthWrapper, which will show MainNavigationShell
+      // since auth state now has a user.
       if (mounted) {
-        // Optionally pop back if using strict routing based on auth state
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
       if (mounted) {
@@ -146,9 +147,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             backgroundColor: Colors.red,
           ),
         );
+        setState(() => _isLoading = false);
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 }
