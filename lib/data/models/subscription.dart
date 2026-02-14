@@ -1,3 +1,5 @@
+import 'category.dart';
+
 /// Subscription model matching the backend schema
 class Subscription {
   final String id;
@@ -6,7 +8,8 @@ class Subscription {
   final String currency;
   final DateTime nextBilling;
   final SubscriptionStatus status;
-  final String? category;
+  final Category? category;
+  final String? categoryId;
   final String? userId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -19,6 +22,7 @@ class Subscription {
     required this.nextBilling,
     this.status = SubscriptionStatus.active,
     this.category,
+    this.categoryId,
     this.userId,
     this.createdAt,
     this.updatedAt,
@@ -47,7 +51,12 @@ class Subscription {
           ? DateTime.parse(json['next_billing'])
           : DateTime.now(),
       status: SubscriptionStatus.fromString(json['status'] ?? 'active'),
-      category: json['category'],
+      category: json['categoryId'] is Map<String, dynamic>
+          ? Category.fromJson(json['categoryId'])
+          : null,
+      categoryId: json['categoryId'] is Map<String, dynamic>
+          ? (json['categoryId']['_id']?.toString() ?? json['categoryId']['id']?.toString())
+          : json['categoryId']?.toString(),
       userId: json['userId'],
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
@@ -65,7 +74,7 @@ class Subscription {
       'currency': currency,
       'next_billing': nextBilling.toIso8601String(),
       'status': status.value,
-      if (category != null) 'category': category,
+      if (categoryId != null) 'categoryId': categoryId,
       if (userId != null) 'userId': userId,
     };
   }
@@ -77,7 +86,8 @@ class Subscription {
     String? currency,
     DateTime? nextBilling,
     SubscriptionStatus? status,
-    String? category,
+    Category? category,
+    String? categoryId,
     String? userId,
   }) {
     return Subscription(
@@ -88,6 +98,7 @@ class Subscription {
       nextBilling: nextBilling ?? this.nextBilling,
       status: status ?? this.status,
       category: category ?? this.category,
+      categoryId: categoryId ?? this.categoryId,
       userId: userId ?? this.userId,
       createdAt: createdAt,
       updatedAt: updatedAt,

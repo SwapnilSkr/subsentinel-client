@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/subscription.dart';
+import '../models/category.dart';
 import 'auth_session_storage.dart';
 
 /// Repository for API calls to the ElysiaJS backend
@@ -116,6 +117,76 @@ class SubscriptionRepository {
     try {
       final response = await _client.delete(
         Uri.parse('$baseUrl/subscriptions/$id'),
+        headers: await _authHeaders(),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  // ==================== CATEGORIES ====================
+
+  /// Fetch all categories (defaults + user's custom)
+  Future<List<Category>> fetchCategories() async {
+    try {
+      final response = await _client.get(
+        Uri.parse('$baseUrl/categories'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => Category.fromJson(e)).toList();
+      }
+      throw HttpException('Failed to load categories: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  /// Create a custom category
+  Future<Category> createCategory(Category category) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('$baseUrl/categories'),
+        headers: await _authHeaders(),
+        body: jsonEncode(category.toJson()),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return Category.fromJson(jsonDecode(response.body));
+      }
+      throw HttpException('Failed to create category: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  /// Update a custom category
+  Future<Category> updateCategory(String id, Category category) async {
+    try {
+      final response = await _client.patch(
+        Uri.parse('$baseUrl/categories/$id'),
+        headers: await _authHeaders(),
+        body: jsonEncode(category.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        return Category.fromJson(jsonDecode(response.body));
+      }
+      throw HttpException('Failed to update category: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  /// Delete a custom category
+  Future<bool> deleteCategory(String id) async {
+    try {
+      final response = await _client.delete(
+        Uri.parse('$baseUrl/categories/$id'),
         headers: await _authHeaders(),
       );
 

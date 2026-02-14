@@ -398,11 +398,48 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                                           ],
                                         ),
                                         const SizedBox(height: 4),
-                                        Text(
-                                          '\$${sub.amount.toStringAsFixed(2)}/mo',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium,
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '\$${sub.amount.toStringAsFixed(2)}/mo',
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodyMedium,
+                                            ),
+                                            if (sub.category != null) ...[
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 6,
+                                                  vertical: 2,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: _parseColor(sub.category!.color)
+                                                      .withValues(alpha: 0.15),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Icon(
+                                                      _mapCategoryIcon(sub.category!.icon),
+                                                      size: 10,
+                                                      color: _parseColor(sub.category!.color),
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      sub.category!.name,
+                                                      style: TextStyle(
+                                                        color: _parseColor(sub.category!.color),
+                                                        fontSize: 10,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -521,9 +558,31 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Category', style: Theme.of(context).textTheme.labelLarge),
-                Text(
-                  sub.category!,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _parseColor(sub.category!.color).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _mapCategoryIcon(sub.category!.icon),
+                        size: 14,
+                        color: _parseColor(sub.category!.color),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        sub.category!.name,
+                        style: TextStyle(
+                          color: _parseColor(sub.category!.color),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -655,6 +714,31 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
         // ignore error - subscription was already removed from UI
       }
     }
+  }
+
+  Color _parseColor(String hex) {
+    final hexStr = hex.replaceFirst('#', '');
+    return Color(int.parse('FF$hexStr', radix: 16));
+  }
+
+  IconData _mapCategoryIcon(String icon) {
+    const iconMap = {
+      'movie': Icons.movie,
+      'music_note': Icons.music_note,
+      'work': Icons.work,
+      'cloud': Icons.cloud,
+      'sports_esports': Icons.sports_esports,
+      'newspaper': Icons.newspaper,
+      'school': Icons.school,
+      'fitness_center': Icons.fitness_center,
+      'account_balance': Icons.account_balance,
+      'chat': Icons.chat,
+      'shopping_bag': Icons.shopping_bag,
+      'restaurant': Icons.restaurant,
+      'directions_car': Icons.directions_car,
+      'build': Icons.build,
+    };
+    return iconMap[icon] ?? Icons.category;
   }
 
   Path _drawEmojiPath(Size size) {
