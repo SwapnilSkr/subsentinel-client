@@ -1,11 +1,12 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/models/user_model.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/auth_session_storage.dart';
+import '../../data/services/google_auth_service.dart';
 
 // --- State ---
 class AuthState {
@@ -37,7 +38,7 @@ final authProvider = NotifierProvider<AuthNotifier, AuthState>(
 class AuthNotifier extends Notifier<AuthState> {
   final AuthRepository _repo = AuthRepository();
   final AuthSessionStorage _sessionStorage = AuthSessionStorage();
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   @override
@@ -48,13 +49,8 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> _init() async {
-    // Initialize Google Sign-In (Required for v7.0+)
-    try {
-      await _googleSignIn.initialize();
-    } catch (e) {
-      // Log initialization error (non-fatal for app start, but fatal for google auth)
-      debugPrint('GoogleSignIn initialize failed: $e');
-    }
+    // Initialize Google Sign-In
+    await _googleAuthService.init();
 
     // 1. Listen to Firebase Auth (Google Sign-In)
     _firebaseAuth.authStateChanges().listen((User? firebaseUser) async {
@@ -155,12 +151,18 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(clearError: true);
     try {
       // 1. Trigger Google Sign In flow
-      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate(
-        scopeHint: ['email'],
-      );
+      // This step is now handled by our GoogleAuthService
+      final GoogleSignInAccount? googleUser = await _googleAuthService.signIn();
+
+      if (googleUser == null) {
+        // User canceled the sign-in
+        state = state.copyWith(isLoading: false);
+        return;
+      }
 
       // 2. Obtain auth details
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await _googleAuthService
+          .getAuthentication(googleUser);
 
       // 3. Create credential
       // Note: accessToken is nullable on some platforms/web, but usually present for OAuth
@@ -205,7 +207,7 @@ class AuthNotifier extends Notifier<AuthState> {
   // Logout
   Future<void> logout() async {
     await _sessionStorage.clearSession();
-    await _googleSignIn.signOut();
+    await _googleAuthService.signOut();
     await _firebaseAuth.signOut();
     state = AuthState(user: null);
   }
