@@ -1,4 +1,4 @@
-# client
+# SubSentinel
 
 A new Flutter project.
 
