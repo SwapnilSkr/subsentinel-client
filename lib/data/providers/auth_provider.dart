@@ -7,6 +7,7 @@ import '../../data/models/user_model.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/auth_session_storage.dart';
 import '../../data/services/google_auth_service.dart';
+import '../../data/services/twilio_auth_service.dart';
 
 // --- State ---
 class AuthState {
@@ -39,6 +40,7 @@ class AuthNotifier extends Notifier<AuthState> {
   final AuthRepository _repo = AuthRepository();
   final AuthSessionStorage _sessionStorage = AuthSessionStorage();
   final GoogleAuthService _googleAuthService = GoogleAuthService();
+  final TwilioAuthService _twilioAuthService = TwilioAuthService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   @override
@@ -120,7 +122,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> sendOtp(String phone) async {
     state = state.copyWith(clearError: true);
     try {
-      await _repo.sendOtp(phone);
+      await _twilioAuthService.sendOtp(phone);
     } catch (e) {
       state = state.copyWith(error: e.toString());
       rethrow;
@@ -131,7 +133,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> verifyOtp(String phone, String code) async {
     state = state.copyWith(clearError: true);
     try {
-      final result = await _repo.verifyOtp(phone, code);
+      final result = await _twilioAuthService.verifyOtp(phone, code);
       final user = result['user'] as AppUser;
       await _sessionStorage.saveSession(
         user: user,
