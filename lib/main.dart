@@ -12,7 +12,9 @@ import 'screens/account_screen.dart';
 import 'widgets/floating_tab_bar.dart';
 
 import 'screens/auth/login_screen.dart';
+import 'screens/onboarding_page.dart';
 import 'data/providers/auth_provider.dart';
+import 'data/providers/onboarding_check_provider.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -88,12 +90,33 @@ class SubSentinelApp extends ConsumerWidget {
   }
 }
 
-class AuthWrapper extends ConsumerWidget {
+class AuthWrapper extends ConsumerStatefulWidget {
   const AuthWrapper({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends ConsumerState<AuthWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeOnboardingCheck();
+    });
+  }
+
+  Future<void> _initializeOnboardingCheck() async {
+    final authState = ref.read(authProvider);
+    if (authState.user != null) {
+      await ref.read(onboardingCheckProvider.notifier).checkStatus();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final onboardingCheck = ref.watch(onboardingCheckProvider);
 
     if (authState.isLoading) {
       return Scaffold(
@@ -104,11 +127,24 @@ class AuthWrapper extends ConsumerWidget {
       );
     }
 
-    if (authState.user != null) {
-      return const MainNavigationShell();
+    if (authState.user == null) {
+      return const LoginScreen();
     }
 
-    return const LoginScreen();
+    if (onboardingCheck.isLoading) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.active),
+        ),
+      );
+    }
+
+    if (!onboardingCheck.isComplete) {
+      return const OnboardingPage();
+    }
+
+    return const MainNavigationShell();
   }
 }
 

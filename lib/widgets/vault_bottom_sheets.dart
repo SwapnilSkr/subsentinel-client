@@ -30,7 +30,6 @@ class _CreateSubscriptionSheetState
   final _formKey = GlobalKey<FormState>();
   final _providerController = TextEditingController();
   final _amountController = TextEditingController();
-  final _logoUrlController = TextEditingController();
   DateTime _nextBilling = DateTime.now().add(const Duration(days: 30));
   String? _categoryId;
   bool _submitting = false;
@@ -39,7 +38,6 @@ class _CreateSubscriptionSheetState
   void dispose() {
     _providerController.dispose();
     _amountController.dispose();
-    _logoUrlController.dispose();
     super.dispose();
   }
 
@@ -249,16 +247,6 @@ class _CreateSubscriptionSheetState
                         );
                       },
                     ),
-                    const SizedBox(height: 4),
-                    TextFormField(
-                      controller: _logoUrlController,
-                      keyboardType: TextInputType.url,
-                      textInputAction: TextInputAction.done,
-                      decoration: _inputDecoration(
-                        context,
-                        'Logo URL (optional)',
-                      ),
-                    ),
                     const SizedBox(height: 18),
                     SizedBox(
                       width: double.infinity,
@@ -356,7 +344,6 @@ class _CreateSubscriptionSheetState
     setState(() => _submitting = true);
 
     final amount = double.parse(_amountController.text.trim());
-    final logoUrl = _logoUrlController.text.trim();
 
     try {
       await ref
@@ -368,7 +355,6 @@ class _CreateSubscriptionSheetState
               amount: amount,
               nextBilling: _nextBilling,
               categoryId: _categoryId,
-              logoUrl: logoUrl.isEmpty ? null : logoUrl,
             ),
           );
       if (mounted) {
@@ -406,7 +392,6 @@ class _CreateCategorySheetState extends ConsumerState<_CreateCategorySheet> {
   late final TextEditingController _nameController;
   late final TextEditingController _iconController;
   late final TextEditingController _colorController;
-  final _logoUrlController = TextEditingController();
   bool _saving = false;
 
   @override
@@ -420,7 +405,6 @@ class _CreateCategorySheetState extends ConsumerState<_CreateCategorySheet> {
     _colorController = TextEditingController(
       text: existing?.color.isNotEmpty == true ? existing!.color : '#00D4FF',
     );
-    _logoUrlController.text = existing?.logoUrl ?? '';
   }
 
   @override
@@ -428,7 +412,6 @@ class _CreateCategorySheetState extends ConsumerState<_CreateCategorySheet> {
     _nameController.dispose();
     _iconController.dispose();
     _colorController.dispose();
-    _logoUrlController.dispose();
     super.dispose();
   }
 
@@ -509,14 +492,6 @@ class _CreateCategorySheetState extends ConsumerState<_CreateCategorySheet> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _logoUrlController,
-                      decoration: _inputDecoration(
-                        context,
-                        'Logo URL (optional)',
-                      ),
-                    ),
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
@@ -579,9 +554,6 @@ class _CreateCategorySheetState extends ConsumerState<_CreateCategorySheet> {
         name: _nameController.text.trim(),
         icon: _iconController.text.trim(),
         color: _colorController.text.trim(),
-        logoUrl: _logoUrlController.text.trim().isEmpty
-            ? null
-            : _logoUrlController.text.trim(),
       );
 
       final category = widget.existingCategory == null

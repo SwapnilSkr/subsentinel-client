@@ -231,4 +231,75 @@ class SubscriptionRepository {
       throw Exception('Network error: $e');
     }
   }
+
+  // ==================== USER PREFERENCES ====================
+
+  /// Save user preferences
+  Future<Map<String, dynamic>> savePreferences(
+    Map<String, dynamic> preferences,
+  ) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('$baseUrl/preferences'),
+        headers: await _authHeaders(),
+        body: jsonEncode(preferences),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      }
+      throw HttpException('Failed to save preferences: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  /// Get user preferences
+  Future<Map<String, dynamic>?> getPreferences() async {
+    try {
+      final response = await _client.get(
+        Uri.parse('$baseUrl/preferences'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  /// Check if onboarding is complete
+  Future<bool> checkOnboardingStatus() async {
+    try {
+      final response = await _client.get(
+        Uri.parse('$baseUrl/preferences/status'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['onboardingComplete'] ?? false;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Complete onboarding
+  Future<bool> completeOnboarding() async {
+    try {
+      final response = await _client.patch(
+        Uri.parse('$baseUrl/preferences/complete'),
+        headers: await _authHeaders(),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
 }
