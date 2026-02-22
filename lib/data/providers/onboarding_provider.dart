@@ -158,22 +158,39 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
   Future<void> savePreferences() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
+      print('🔄 [PROVIDER] savePreferences called');
+
       final repository = ref.read(onboardingRepositoryProvider);
       final authStorage = ref.read(onboardingAuthStorageProvider);
       final token = await authStorage.readAuthToken();
+
       if (token == null) {
+        print('❌ [PROVIDER] No auth token found');
         throw Exception('Not authenticated');
       }
+      print('✅ [PROVIDER] Auth token found');
 
-      await repository.savePreferences({
+      final preferencesData = {
         'budget': state.data.budget ?? 0,
         'spendingAwareness': state.data.spendingAwareness ?? 'unsure',
         'categories': state.data.categories,
         'painPoints': state.data.painPoints,
         'goals': state.data.goals,
         'alertTiming': state.data.alertTiming ?? '24h',
-      });
+      };
+
+      print('📤 [PROVIDER] Sending preferences to repository:');
+      print('  - budget: ${preferencesData['budget']}');
+      print('  - spendingAwareness: ${preferencesData['spendingAwareness']}');
+      print('  - categories: ${preferencesData['categories']}');
+      print('  - painPoints: ${preferencesData['painPoints']}');
+      print('  - goals: ${preferencesData['goals']}');
+      print('  - alertTiming: ${preferencesData['alertTiming']}');
+
+      await repository.savePreferences(preferencesData);
+      print('✅ [PROVIDER] savePreferences completed');
     } catch (e) {
+      print('❌ [PROVIDER] savePreferences error: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }

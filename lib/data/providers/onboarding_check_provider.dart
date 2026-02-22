@@ -32,13 +32,22 @@ class OnboardingCheckNotifier extends Notifier<OnboardingCheckState> {
   }
 
   Future<void> checkStatus() async {
+    print('🔄 [ONBOARDING_CHECK] checkStatus called');
     state = state.copyWith(isLoading: true, error: null);
     try {
+      print(
+        '📤 [ONBOARDING_CHECK] Calling onboardingProvider.checkOnboardingStatus...',
+      );
       final complete = await ref
           .read(onboardingProvider.notifier)
           .checkOnboardingStatus();
+      print('✅ [ONBOARDING_CHECK] Onboarding status: $complete');
       state = state.copyWith(isLoading: false, isComplete: complete);
     } catch (e) {
+      print('❌ [ONBOARDING_CHECK] Error: $e');
+      print(
+        '❌ [ONBOARDING_CHECK] Defaulting to isComplete=false (safe default)',
+      );
       state = state.copyWith(
         isLoading: false,
         isComplete: false,

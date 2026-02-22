@@ -65,7 +65,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   AlertsStep(onNext: nextPage),
                   CompletionStep(
                     onComplete: () {
-                      Navigator.of(context).pushReplacementNamed('/dashboard');
+                      Navigator.of(context).pop();
                     },
                   ),
                 ],

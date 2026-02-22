@@ -38,6 +38,9 @@ class CategoriesNotifier extends AsyncNotifier<List<Category>> {
   Future<Category> updateCategory(String id, Category category) async {
     final repository = ref.read(subscriptionRepositoryProvider);
     final updated = await repository.updateCategory(id, category);
+    if (updated == null) {
+      throw Exception('Failed to update category');
+    }
 
     final currentList = state.value ?? [];
     state = AsyncValue.data(

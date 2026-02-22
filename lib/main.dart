@@ -107,9 +107,15 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   }
 
   Future<void> _initializeOnboardingCheck() async {
+    print('🔄 [AUTHWRAPPER] Initializing onboarding check...');
     final authState = ref.read(authProvider);
     if (authState.user != null) {
+      print(
+        '✅ [AUTHWRAPPER] User authenticated, checking onboarding status...',
+      );
       await ref.read(onboardingCheckProvider.notifier).checkStatus();
+    } else {
+      print('❌ [AUTHWRAPPER] No user authenticated');
     }
   }
 
@@ -118,7 +124,14 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     final authState = ref.watch(authProvider);
     final onboardingCheck = ref.watch(onboardingCheckProvider);
 
+    print('🔄 [AUTHWRAPPER] Building...');
+    print('  - Auth loading: ${authState.isLoading}');
+    print('  - User exists: ${authState.user != null}');
+    print('  - Onboarding loading: ${onboardingCheck.isLoading}');
+    print('  - Onboarding complete: ${onboardingCheck.isComplete}');
+
     if (authState.isLoading) {
+      print('📱 [AUTHWRAPPER] Showing loading spinner...');
       return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: const Center(
@@ -128,10 +141,12 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     }
 
     if (authState.user == null) {
+      print('📱 [AUTHWRAPPER] Showing LoginScreen');
       return const LoginScreen();
     }
 
     if (onboardingCheck.isLoading) {
+      print('📱 [AUTHWRAPPER] Showing onboarding check loading...');
       return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: const Center(
@@ -141,9 +156,15 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     }
 
     if (!onboardingCheck.isComplete) {
+      print(
+        '📱 [AUTHWRAPPER] Showing OnboardingPage (onboarding not complete)',
+      );
       return const OnboardingPage();
     }
 
+    print(
+      '📱 [AUTHWRAPPER] Showing MainNavigationShell (onboarding complete, user authenticated)',
+    );
     return const MainNavigationShell();
   }
 }

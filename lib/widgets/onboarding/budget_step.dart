@@ -61,12 +61,12 @@ class _BudgetStepState extends ConsumerState<BudgetStep> {
             spacing: 12,
             runSpacing: 12,
             children: _presets.map((preset) {
-              final isSelected = _selectedPreset == preset['value'];
+              final isSelected = _selectedPreset == preset['value'].toString();
               return GestureDetector(
                 onTap: () {
                   HapticFeedback.selectionClick();
                   setState(() {
-                    _selectedPreset = preset['value'];
+                    _selectedPreset = preset['value'].toString();
                     _budgetController.text = preset['value'].toString();
                   });
                   ref

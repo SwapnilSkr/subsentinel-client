@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/models/subscription.dart';
 import '../../../data/providers/onboarding_provider.dart';
+import '../../../data/providers/onboarding_check_provider.dart';
 import '../../../data/providers/subscription_providers.dart';
 
 class CompletionStep extends ConsumerStatefulWidget {
@@ -20,36 +21,100 @@ class _CompletionStepState extends ConsumerState<CompletionStep> {
   @override
   void initState() {
     super.initState();
-    _saveOnboardingData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _saveOnboardingData();
+    });
   }
 
   Future<void> _saveOnboardingData() async {
     try {
+      debugPrint('🔄 Starting onboarding data save...');
+
       final onboardingNotifier = ref.read(onboardingProvider.notifier);
       final onboardingState = ref.read(onboardingProvider);
 
-      await onboardingNotifier.savePreferences();
+      debugPrint('📊 Onboarding state:');
+      debugPrint('  - Budget: ${onboardingState.data.budget}');
+      debugPrint(
+        '  - Spending Awareness: ${onboardingState.data.spendingAwareness}',
+      );
+      debugPrint(
+        '  - Categories count: ${onboardingState.data.categories.length}',
+      );
+      debugPrint('  - Categories: ${onboardingState.data.categories}');
+      debugPrint(
+        '  - Pain Points count: ${onboardingState.data.painPoints.length}',
+      );
+      debugPrint('  - Pain Points: ${onboardingState.data.painPoints}');
+      debugPrint('  - Goals count: ${onboardingState.data.goals.length}');
+      debugPrint('  - Goals: ${onboardingState.data.goals}');
+      debugPrint('  - Alert Timing: ${onboardingState.data.alertTiming}');
+      debugPrint(
+        '  - Subscriptions count: ${onboardingState.data.subscriptions.length}',
+      );
 
-      for (final sub in onboardingState.data.subscriptions) {
-        await ref
-            .read(subscriptionsProvider.notifier)
-            .createSubscription(
-              Subscription(
-                id: '',
-                provider: sub['provider'],
-                amount: (sub['amount'] as num).toDouble(),
-                nextBilling: DateTime.parse(sub['next_billing']),
-                categoryId: sub['categoryId'],
-              ),
-            );
+      debugPrint('📤 Calling savePreferences()...');
+      await onboardingNotifier.savePreferences();
+      debugPrint('✅ savePreferences() completed successfully');
+
+      debugPrint('📤 Creating subscriptions...');
+      int successfulSubs = 0;
+      for (int i = 0; i < onboardingState.data.subscriptions.length; i++) {
+        final sub = onboardingState.data.subscriptions[i];
+        debugPrint(
+          '  - Creating subscription ${i + 1}/${onboardingState.data.subscriptions.length}: ${sub['provider']} - \$${sub['amount']}',
+        );
+        try {
+          await ref
+              .read(subscriptionsProvider.notifier)
+              .createSubscription(
+                Subscription(
+                  id: '',
+                  provider: sub['provider'],
+                  amount: (sub['amount'] as num).toDouble(),
+                  nextBilling: DateTime.parse(sub['next_billing']),
+                  categoryId: sub['categoryId'],
+                ),
+              );
+          debugPrint('    ✅ Subscription ${i + 1} created');
+          successfulSubs++;
+        } catch (e) {
+          debugPrint('    ❌ Subscription ${i + 1} failed: $e');
+        }
+      }
+      if (successfulSubs > 0) {
+        debugPrint(
+          '✅ $successfulSubs/${onboardingState.data.subscriptions.length} subscriptions created',
+        );
+      } else {
+        debugPrint('⚠️ No subscriptions were created successfully');
       }
 
+      debugPrint('📤 Calling completeOnboarding()...');
       await onboardingNotifier.completeOnboarding();
+      debugPrint('✅ completeOnboarding() completed successfully');
+
+      debugPrint('📤 Refreshing providers...');
       await ref.read(subscriptionsProvider.notifier).refresh();
       await ref.read(dashboardSummaryProvider.notifier).refresh();
+      debugPrint('✅ Providers refreshed');
 
+      // Invalidate onboarding check provider to force status refresh
+      debugPrint('🔄 Invalidating onboarding check provider...');
+      ref.invalidate(onboardingCheckProvider);
+      debugPrint('✅ Onboarding check provider invalidated');
+
+      // Wait for provider to rebuild, then trigger status check
+      await Future.delayed(const Duration(milliseconds: 100));
+      debugPrint('🔄 Triggering onboarding status check after invalidation...');
+      ref.read(onboardingCheckProvider.notifier).checkStatus();
+      debugPrint('✅ Onboarding status check triggered');
+
+      debugPrint('🎉 Onboarding save completed successfully!');
       if (mounted) setState(() => _isLoading = false);
     } catch (e) {
+      debugPrint('❌ ERROR in _saveOnboardingData: $e');
+      debugPrint('❌ Stack trace: ${StackTrace.current}');
       if (mounted) setState(() => _isLoading = false);
     }
   }
