@@ -13,8 +13,7 @@ import 'widgets/floating_tab_bar.dart';
 
 import 'screens/auth/login_screen.dart';
 import 'screens/onboarding_page.dart';
-import 'data/providers/auth_provider.dart';
-import 'data/providers/onboarding_check_provider.dart';
+import 'data/providers/app_init_provider.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -90,82 +89,47 @@ class SubSentinelApp extends ConsumerWidget {
   }
 }
 
-class AuthWrapper extends ConsumerStatefulWidget {
+class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
 
   @override
-  ConsumerState<AuthWrapper> createState() => _AuthWrapperState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appState = ref.watch(appInitProvider);
 
-class _AuthWrapperState extends ConsumerState<AuthWrapper> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeOnboardingCheck();
-    });
-  }
-
-  Future<void> _initializeOnboardingCheck() async {
-    print('🔄 [AUTHWRAPPER] Initializing onboarding check...');
-    final authState = ref.read(authProvider);
-    if (authState.user != null) {
-      print(
-        '✅ [AUTHWRAPPER] User authenticated, checking onboarding status...',
-      );
-      await ref.read(onboardingCheckProvider.notifier).checkStatus();
-    } else {
-      print('❌ [AUTHWRAPPER] No user authenticated');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-    final onboardingCheck = ref.watch(onboardingCheckProvider);
-
-    print('🔄 [AUTHWRAPPER] Building...');
-    print('  - Auth loading: ${authState.isLoading}');
-    print('  - User exists: ${authState.user != null}');
-    print('  - Onboarding loading: ${onboardingCheck.isLoading}');
-    print('  - Onboarding complete: ${onboardingCheck.isComplete}');
-
-    if (authState.isLoading) {
-      print('📱 [AUTHWRAPPER] Showing loading spinner...');
-      return Scaffold(
+    return appState.when(
+      loading: () => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: const Center(
           child: CircularProgressIndicator(color: AppColors.active),
         ),
-      );
-    }
-
-    if (authState.user == null) {
-      print('📱 [AUTHWRAPPER] Showing LoginScreen');
-      return const LoginScreen();
-    }
-
-    if (onboardingCheck.isLoading) {
-      print('📱 [AUTHWRAPPER] Showing onboarding check loading...');
-      return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: const Center(
-          child: CircularProgressIndicator(color: AppColors.active),
+      ),
+      error: (error, stack) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: AppColors.alert),
+              const SizedBox(height: 16),
+              Text('Error: $error'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(appInitProvider),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
         ),
-      );
-    }
-
-    if (!onboardingCheck.isComplete) {
-      print(
-        '📱 [AUTHWRAPPER] Showing OnboardingPage (onboarding not complete)',
-      );
-      return const OnboardingPage();
-    }
-
-    print(
-      '📱 [AUTHWRAPPER] Showing MainNavigationShell (onboarding complete, user authenticated)',
+      ),
+      data: (state) {
+        if (state.user == null) {
+          return const LoginScreen();
+        }
+        if (!state.onboardingComplete) {
+          return const OnboardingPage();
+        }
+        return const MainNavigationShell();
+      },
     );
-    return const MainNavigationShell();
   }
 }
 

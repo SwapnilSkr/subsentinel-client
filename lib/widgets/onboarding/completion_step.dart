@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/models/subscription.dart';
 import '../../../data/providers/onboarding_provider.dart';
-import '../../../data/providers/onboarding_check_provider.dart';
+import '../../../data/providers/app_init_provider.dart';
 import '../../../data/providers/subscription_providers.dart';
 
 class CompletionStep extends ConsumerStatefulWidget {
@@ -99,16 +99,9 @@ class _CompletionStepState extends ConsumerState<CompletionStep> {
       await ref.read(dashboardSummaryProvider.notifier).refresh();
       debugPrint('✅ Providers refreshed');
 
-      // Invalidate onboarding check provider to force status refresh
-      debugPrint('🔄 Invalidating onboarding check provider...');
-      ref.invalidate(onboardingCheckProvider);
-      debugPrint('✅ Onboarding check provider invalidated');
-
-      // Wait for provider to rebuild, then trigger status check
-      await Future.delayed(const Duration(milliseconds: 100));
-      debugPrint('🔄 Triggering onboarding status check after invalidation...');
-      ref.read(onboardingCheckProvider.notifier).checkStatus();
-      debugPrint('✅ Onboarding status check triggered');
+      debugPrint('🔄 Invalidating app init provider...');
+      refreshAppInit(ref);
+      debugPrint('✅ App init provider invalidated');
 
       debugPrint('🎉 Onboarding save completed successfully!');
       if (mounted) setState(() => _isLoading = false);

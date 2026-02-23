@@ -120,13 +120,7 @@ class AuthNotifier extends Notifier<AuthState> {
   // Setting isLoading on auth state would cause AuthWrapper to swap out the
   // current screen with a loading spinner, unmounting the widget mid-call.
   Future<void> sendOtp(String phone) async {
-    state = state.copyWith(clearError: true);
-    try {
-      await _twilioAuthService.sendOtp(phone);
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-      rethrow;
-    }
+    await _twilioAuthService.sendOtp(phone);
   }
 
   // Verify OTP (Twilio Logic)
