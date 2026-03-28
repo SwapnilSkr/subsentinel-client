@@ -37,7 +37,7 @@ class WelcomeStep extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            "Let's personalize your experience.\nWe'll ask a few questions to help you track\nand manage your subscriptions.",
+            "Let's personalize your experience.\nWe'll ask a few questions to help you track,\nmanage, and connect your alert sources.",
             style: Theme.of(
               context,
             ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),

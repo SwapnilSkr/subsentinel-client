@@ -9,6 +9,7 @@ import '../../widgets/onboarding/categories_step.dart';
 import '../../widgets/onboarding/add_subscriptions_step.dart';
 import '../../widgets/onboarding/pain_points_step.dart';
 import '../../widgets/onboarding/goals_step.dart';
+import '../../widgets/onboarding/integration_step.dart';
 import '../../widgets/onboarding/alerts_step.dart';
 import '../../widgets/onboarding/completion_step.dart';
 
@@ -44,7 +45,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       body: SafeArea(
         child: Column(
           children: [
-            if (_currentPage < 8) _buildProgressIndicator(),
+            if (_currentPage < 9) _buildProgressIndicator(),
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -62,6 +63,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   AddSubscriptionsStep(onNext: nextPage),
                   PainPointsStep(onNext: nextPage),
                   GoalsStep(onNext: nextPage),
+                  IntegrationStep(onNext: nextPage),
                   AlertsStep(onNext: nextPage),
                   CompletionStep(
                     onComplete: () {
@@ -78,7 +80,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Widget _buildProgressIndicator() {
-    final totalSteps = 8;
+    final totalSteps = 9;
     final progress = (_currentPage / totalSteps).clamp(0.0, 1.0);
 
     return Padding(

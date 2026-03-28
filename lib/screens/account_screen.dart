@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/theme_mode_provider.dart';
 import '../data/models/user_model.dart';
+import '../data/models/user_preferences.dart';
 import '../data/providers/auth_provider.dart';
+import '../data/providers/preferences_provider.dart';
 import '../widgets/glass_card.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -14,6 +16,7 @@ class AccountScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final preferencesAsync = ref.watch(userPreferencesProvider);
     final user = authState.user;
     final themeMode = ref.watch(themeModeProvider);
     final isDark = themeMode == ThemeMode.dark;
@@ -133,6 +136,56 @@ class AccountScreen extends ConsumerWidget {
               ),
             ).animate().fadeIn(delay: 240.ms).slideY(begin: 0.08),
             const SizedBox(height: 14),
+            GlassCard(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Alert Sources',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'The signal sources you selected during onboarding.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  preferencesAsync.when(
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(color: AppColors.active),
+                    ),
+                    error: (_, __) => const Text(
+                      'Unable to load source preferences right now.',
+                    ),
+                    data: (preferences) => Column(
+                      children: [
+                        _IntegrationStatusTile(
+                          icon: Icons.mail_outline_rounded,
+                          title: 'Gmail inbox',
+                          subtitle: _gmailSubtitle(user, preferences),
+                          active: preferences?.integrations.gmail == true,
+                          available:
+                              (user?.googleId?.trim().isNotEmpty ?? false) ||
+                              (user?.email?.trim().isNotEmpty ?? false),
+                          activeColor: AppColors.active,
+                        ),
+                        const SizedBox(height: 12),
+                        _IntegrationStatusTile(
+                          icon: Icons.sms_outlined,
+                          title: 'SMS alerts',
+                          subtitle: _smsSubtitle(user, preferences),
+                          active: preferences?.integrations.sms == true,
+                          available: user?.phone?.trim().isNotEmpty ?? false,
+                          activeColor: AppColors.scanLine,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(delay: 270.ms).slideY(begin: 0.08),
+            const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
@@ -156,6 +209,84 @@ class AccountScreen extends ConsumerWidget {
             ).animate().fadeIn(delay: 300.ms),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _IntegrationStatusTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool active;
+  final bool available;
+  final Color activeColor;
+
+  const _IntegrationStatusTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.active,
+    required this.available,
+    required this.activeColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = active
+        ? activeColor
+        : available
+        ? AppColors.textSecondaryFor(context)
+        : AppColors.textMutedFor(context);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.glassBackgroundFor(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: active
+              ? activeColor.withValues(alpha: 0.45)
+              : AppColors.glassBorderFor(context),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 2),
+                Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              active ? 'Enabled' : (available ? 'Available' : 'Unavailable'),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -316,6 +447,32 @@ String _secondaryLabel(AppUser? user) {
     return phone;
   }
   return 'Signed in';
+}
+
+String _gmailSubtitle(AppUser? user, UserPreferences? preferences) {
+  final enabled = preferences?.integrations.gmail == true;
+  final available =
+      (user?.googleId?.trim().isNotEmpty ?? false) ||
+      (user?.email?.trim().isNotEmpty ?? false);
+  if (enabled && available) {
+    return 'Selected as an alert source during onboarding.';
+  }
+  if (available) {
+    return 'Google identity is present, but Gmail detection is not enabled.';
+  }
+  return 'Not available for this account yet.';
+}
+
+String _smsSubtitle(AppUser? user, UserPreferences? preferences) {
+  final enabled = preferences?.integrations.sms == true;
+  final available = user?.phone?.trim().isNotEmpty ?? false;
+  if (enabled && available) {
+    return 'Selected as an alert source during onboarding.';
+  }
+  if (available) {
+    return 'Verified phone is present, but SMS alerts are not enabled.';
+  }
+  return 'Not available for this account yet.';
 }
 
 String _initials(AppUser? user) {

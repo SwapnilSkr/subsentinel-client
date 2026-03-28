@@ -4,6 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../data/models/subscription.dart';
 import '../../../data/providers/onboarding_provider.dart';
 import '../../../data/providers/app_init_provider.dart';
+import '../../../data/providers/preferences_provider.dart';
 import '../../../data/providers/subscription_providers.dart';
 
 class CompletionStep extends ConsumerStatefulWidget {
@@ -48,6 +49,9 @@ class _CompletionStepState extends ConsumerState<CompletionStep> {
       debugPrint('  - Pain Points: ${onboardingState.data.painPoints}');
       debugPrint('  - Goals count: ${onboardingState.data.goals.length}');
       debugPrint('  - Goals: ${onboardingState.data.goals}');
+      debugPrint(
+        '  - Integrations: gmail=${onboardingState.data.gmailIntegrationEnabled}, sms=${onboardingState.data.smsIntegrationEnabled}',
+      );
       debugPrint('  - Alert Timing: ${onboardingState.data.alertTiming}');
       debugPrint(
         '  - Subscriptions count: ${onboardingState.data.subscriptions.length}',
@@ -101,6 +105,7 @@ class _CompletionStepState extends ConsumerState<CompletionStep> {
 
       debugPrint('🔄 Invalidating app init provider...');
       refreshAppInit(ref);
+      ref.invalidate(userPreferencesProvider);
       debugPrint('✅ App init provider invalidated');
 
       debugPrint('🎉 Onboarding save completed successfully!');
@@ -192,6 +197,13 @@ class _CompletionStepState extends ConsumerState<CompletionStep> {
                     _getAlertTimingLabel(state.data.alertTiming ?? '24h'),
                     Icons.notifications,
                   ),
+                  const SizedBox(height: 12),
+                  _buildSummaryRow(
+                    context,
+                    'Alert sources',
+                    _getIntegrationSummary(state),
+                    Icons.hub_rounded,
+                  ),
                 ],
               ),
             ),
@@ -262,5 +274,19 @@ class _CompletionStepState extends ConsumerState<CompletionStep> {
       default:
         return '24 hours';
     }
+  }
+
+  String _getIntegrationSummary(OnboardingState state) {
+    final enabled = <String>[];
+    if (state.data.gmailIntegrationEnabled) {
+      enabled.add('Gmail');
+    }
+    if (state.data.smsIntegrationEnabled) {
+      enabled.add('SMS');
+    }
+    if (enabled.isEmpty) {
+      return 'Not enabled';
+    }
+    return enabled.join(' + ');
   }
 }

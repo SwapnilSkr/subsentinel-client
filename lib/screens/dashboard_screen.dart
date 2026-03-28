@@ -4,8 +4,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_theme.dart';
+import '../data/models/user_preferences.dart';
 import '../data/providers/subscription_providers.dart';
 import '../data/models/subscription.dart';
+import '../data/providers/preferences_provider.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/skeleton_glow.dart';
 
@@ -56,6 +58,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     final summaryAsync = ref.watch(dashboardSummaryProvider);
+    final preferencesAsync = ref.watch(userPreferencesProvider);
 
     return SafeArea(
       child: RefreshIndicator(
@@ -85,6 +88,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                 loading: () => _buildLoadingHero(),
                 error: (error, stack) => _buildErrorWidget(error),
                 data: (summary) => _buildHeroWidget(summary),
+              ),
+
+              const SizedBox(height: 16),
+              preferencesAsync.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (preferences) => preferences == null
+                    ? const SizedBox.shrink()
+                    : _buildSignalSourcesCard(preferences),
               ),
 
               const SizedBox(height: 24),
@@ -511,6 +523,65 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         ),
       ],
     ).animate().fadeIn(delay: 500.ms, duration: 400.ms);
+  }
+
+  Widget _buildSignalSourcesCard(UserPreferences preferences) {
+    final enabledSources = <String>[];
+    if (preferences.integrations.gmail) {
+      enabledSources.add('Gmail');
+    }
+    if (preferences.integrations.sms) {
+      enabledSources.add('SMS');
+    }
+    final sourceLabel = enabledSources.isEmpty
+        ? 'No alert sources selected'
+        : '${enabledSources.join(' + ')} selected';
+
+    return GlassCard(
+      padding: const EdgeInsets.all(18),
+      accentColor: enabledSources.isEmpty
+          ? AppColors.textMuted
+          : AppColors.scanLine,
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.scanLine.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.hub_rounded, color: AppColors.scanLine),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Signal Sources',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  sourceLabel,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '${enabledSources.length}/2',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: enabledSources.isEmpty
+                  ? AppColors.textMuted
+                  : AppColors.scanLine,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 250.ms, duration: 400.ms);
   }
 }
 

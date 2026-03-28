@@ -11,6 +11,7 @@ enum OnboardingStep {
   addSubscriptions,
   painPoints,
   goals,
+  integrations,
   alerts,
   completion,
 }
@@ -22,6 +23,8 @@ class OnboardingData {
   final List<Map<String, dynamic>> subscriptions;
   final List<String> painPoints;
   final List<String> goals;
+  final bool gmailIntegrationEnabled;
+  final bool smsIntegrationEnabled;
   final String? alertTiming;
 
   const OnboardingData({
@@ -31,6 +34,8 @@ class OnboardingData {
     this.subscriptions = const [],
     this.painPoints = const [],
     this.goals = const [],
+    this.gmailIntegrationEnabled = false,
+    this.smsIntegrationEnabled = false,
     this.alertTiming,
   });
 
@@ -41,6 +46,8 @@ class OnboardingData {
     List<Map<String, dynamic>>? subscriptions,
     List<String>? painPoints,
     List<String>? goals,
+    bool? gmailIntegrationEnabled,
+    bool? smsIntegrationEnabled,
     String? alertTiming,
   }) {
     return OnboardingData(
@@ -50,6 +57,10 @@ class OnboardingData {
       subscriptions: subscriptions ?? this.subscriptions,
       painPoints: painPoints ?? this.painPoints,
       goals: goals ?? this.goals,
+      gmailIntegrationEnabled:
+          gmailIntegrationEnabled ?? this.gmailIntegrationEnabled,
+      smsIntegrationEnabled:
+          smsIntegrationEnabled ?? this.smsIntegrationEnabled,
       alertTiming: alertTiming ?? this.alertTiming,
     );
   }
@@ -151,6 +162,15 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     state = state.copyWith(data: state.data.copyWith(goals: goals));
   }
 
+  void updateIntegrations({bool? gmail, bool? sms}) {
+    state = state.copyWith(
+      data: state.data.copyWith(
+        gmailIntegrationEnabled: gmail ?? state.data.gmailIntegrationEnabled,
+        smsIntegrationEnabled: sms ?? state.data.smsIntegrationEnabled,
+      ),
+    );
+  }
+
   void updateAlertTiming(String timing) {
     state = state.copyWith(data: state.data.copyWith(alertTiming: timing));
   }
@@ -177,6 +197,10 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
         'painPoints': state.data.painPoints,
         'goals': state.data.goals,
         'alertTiming': state.data.alertTiming ?? '24h',
+        'integrations': {
+          'gmail': state.data.gmailIntegrationEnabled,
+          'sms': state.data.smsIntegrationEnabled,
+        },
       };
 
       print('📤 [PROVIDER] Sending preferences to repository:');
@@ -186,6 +210,7 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       print('  - painPoints: ${preferencesData['painPoints']}');
       print('  - goals: ${preferencesData['goals']}');
       print('  - alertTiming: ${preferencesData['alertTiming']}');
+      print('  - integrations: ${preferencesData['integrations']}');
 
       await repository.savePreferences(preferencesData);
       print('✅ [PROVIDER] savePreferences completed');
